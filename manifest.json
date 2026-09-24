@@ -1,0 +1,18 @@
+{
+  "name": "RV There Yet? — Трекер ачивок",
+  "short_name": "RV Achievements",
+  "description": "Интерактивный трекер всех 96 ачивок RV There Yet?",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#0b0f19",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

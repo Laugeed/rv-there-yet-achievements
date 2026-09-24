@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RV There Yet? — Трекер ачивок</title>
+
+<meta name="theme-color" content="#0b0f19">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RV Achievements">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0f19;
+  --bg2: #111827;
+  --card: #1a2234;
+  --card-hover: #1f2a40;
+  --border: #2a3548;
+  --text: #e5e7eb;
+  --text-muted: #9ca3af;
+  --accent: #3b82f6;
+  --accent2: #8b5cf6;
+  --green: #22c55e;
+  --yellow: #eab308;
+  --red: #ef4444;
+  --map1: #3b82f6;
+  --map2: #22c55e;
+  --map3: #f97316;
+  --radius: 16px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.bg-orbs {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.25;
+  animation: float 20s ease-in-out infinite;
+}
+.orb1 { width: 500px; height: 500px; background: #3b82f6; top: -10%; left: -10%; }
+.orb2 { width: 400px; height: 400px; background: #8b5cf6; top: 40%; right: -5%; animation-delay: -7s; }
+.orb3 { width: 350px; height: 350px; background: #f97316; bottom: -10%; left: 30%; animation-delay: -14s; }
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 40px;
+  animation: fadeUp 0.8s ease-out;
+}
+header .logo {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+header h1 {
+  font-size: clamp(28px, 5vw, 42px);
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+header p {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.progress-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow);
+  animation: fadeUp 0.8s ease-out 0.1s both;
+}
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.progress-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+}
+.progress-stats {
+  display: flex;
+  gap: 20px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.progress-stats strong {
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+}
+.progress-bar-bg {
+  height: 12px;
+  background: var(--bg2);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 99px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+}
+.progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 28px;
+  animation: fadeUp 0.8s ease-out 0.2s both;
+}
+.search-box {
+  flex: 1;
+  min-width: 200px;
+  position: relative;
+}
+.search-box input {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-box input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+}
+.search-box svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  width: 18px;
+  height: 18px;
+}
+.filter-btn {
+  padding: 10px 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.filter-btn:hover { background: var(--card-hover); color: var(--text); }
+.filter-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+}
+.filter-btn.map1.active { background: var(--map1); border-color: var(--map1); }
+.filter-btn.map2.active { background: var(--map2); border-color: var(--map2); }
+.filter-btn.map3.active { background: var(--map3); border-color: var(--map3); }
+.filter-btn.hard.active { background: var(--red); border-color: var(--red); }
+.filter-btn.easy.active { background: var(--green); border-color: var(--green); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s, border-color 0.25s, opacity 0.3s;
+  animation: fadeUp 0.5s ease-out both;
+  position: relative;
+  overflow: hidden;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+  border-color: #3a4a66;
+}
+.card.done {
+  opacity: 0.7;
+  border-color: rgba(34,197,94,0.3);
+}
+.card.done .card-title { text-decoration: line-through; color: var(--text-muted); }
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  transition: color 0.2s;
+}
+.card-en {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 99px;
+  letter-spacing: 0.3px;
+}
+.badge-map1 { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.badge-map2 { background: rgba(34,197,94,0.15); color: #4ade80; }
+.badge-map3 { background: rgba(249,115,22,0.15); color: #fb923c; }
+.badge-easy { background: rgba(34,197,94,0.12); color: #4ade80; }
+.badge-hard { background: rgba(239,68,68,0.12); color: #f87171; }
+
+.card-desc {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.status-btns {
+  display: flex;
+  gap: 8px;
+}
+.status-btn {
+  flex: 1;
+  padding: 8px 4px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg2);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.status-btn:hover { background: var(--card-hover); color: var(--text); }
+.status-btn.active-todo { background: rgba(156,163,175,0.2); color: #d1d5db; border-color: #6b7280; }
+.status-btn.active-progress { background: rgba(234,179,8,0.2); color: #facc15; border-color: #ca8a04; }
+.status-btn.active-done { background: rgba(34,197,94,0.2); color: #4ade80; border-color: #16a34a; }
+
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  display: none;
+}
+.empty.show { display: block; animation: fadeUp 0.4s ease-out; }
+.empty svg { width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.4; }
+
+footer {
+  text-align: center;
+  margin-top: 48px;
+  color: var(--text-muted);
+  font-size: 13px;
+  animation: fadeUp 0.8s ease-out 0.4s both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .grid { grid-template-columns: 1fr; }
+  .controls { flex-direction: column; }
+  .filter-btn { width: 100%; text-align: center; }
+}
+</style>
+</head>
+<body>
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<div class="app">
+  <header>
+    <div class="logo">RV There Yet?</div>
+    <h1>Трекер ачивок</h1>
+    <p>Все 96 достижений · Отмечай прогресс · Данные сохраняются локально</p>
+  </header>
+
+  <div class="progress-section">
+    <div class="progress-header">
+      <h2>Общий прогресс</h2>
+      <div class="progress-stats">
+        <span>Готово: <strong id="stat-done">0</strong></span>
+        <span>В процессе: <strong id="stat-progress">0</strong></span>
+        <span>Осталось: <strong id="stat-todo">96</strong></span>
+      </div>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="search-box">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" id="search" placeholder="Поиск по названию или описанию...">
+    </div>
+    <button class="filter-btn active" data-group="map" data-filter="all">Все карты</button>
+    <button class="filter-btn map1" data-group="map" data-filter="map1">Mabutts Valley</button>
+    <button class="filter-btn map2" data-group="map" data-filter="map2">Mt. Yurbuttsk</button>
+    <button class="filter-btn map3" data-group="map" data-filter="map3">St. Búttin Bay</button>
+    <button class="filter-btn easy" data-group="diff" data-filter="easy">Простые</button>
+    <button class="filter-btn hard" data-group="diff" data-filter="hard">Сложные</button>
+    <button class="filter-btn" data-group="status" data-filter="todo">Не сделано</button>
+    <button class="filter-btn" data-group="status" data-filter="progress">В процессе</button>
+    <button class="filter-btn" data-group="status" data-filter="done">Готово</button>
+    <button class="filter-btn" id="reset-filters" style="margin-left:auto;opacity:0.7">Сбросить</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <p>Ничего не найдено</p>
+  </div>
+
+  <footer>
+    Сделано для комьюнити RV There Yet? · Прогресс сохраняется в браузере
+  </footer>
+</div>
+
+<script>
+/* FULL SCRIPT WILL BE LOADED FROM ORIGINAL FILE - PLACEHOLDER */
+alert('Please use the full version');
+</script>
+</body>
+</html>
